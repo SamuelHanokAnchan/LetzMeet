@@ -1,0 +1,431 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letz Meet</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #5468ff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --danger-color: #dc3545;
+            --highlight-color: #ffcc00;
+        }
+        
+        body {
+            padding-top: 2rem;
+            background-color: #f0f2f5;
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark-color);
+        }
+        
+        .container-fluid {
+            max-width: 1400px;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), #7c4dff);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(84, 104, 255, 0.3);
+        }
+        
+        .page-header h1 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 2.5rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .page-header p {
+            margin: 0.5rem 0 0;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+        
+        .card {
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.07);
+            transition: transform 0.3s, box-shadow 0.3s;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            border-bottom: none;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .time-slot {
+            background-color: #e9f7ef;
+            border-left: 4px solid var(--success-color);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .time-slot:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .meetup-card {
+            background: linear-gradient(145deg, #ffd6a5, #fff2e0);
+            border-left: 6px solid var(--highlight-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(255, 204, 0, 0.15);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 204, 0, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 204, 0, 0);
+            }
+        }
+        
+        .user-entry {
+            background-color: var(--light-color);
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary-color);
+            transition: all 0.2s ease;
+        }
+        
+        .user-entry:hover {
+            background-color: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            border: 1px solid #ced4da;
+            transition: all 0.2s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(84, 104, 255, 0.25);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 0.6rem 1.5rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary:hover {
+            background-color: #4559e9;
+            border-color: #4559e9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(84, 104, 255, 0.3);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border: none;
+        }
+        
+        .full-day-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 10px;
+            background-color: #e9f4ff;
+            border-radius: 8px;
+            border: 1px dashed var(--primary-color);
+        }
+        
+        .section-title {
+            font-weight: 600;
+            color: var(--dark-color);
+            border-bottom: 2px solid var(--light-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .invisible-btn {
+            background: none;
+            border: none;
+        }
+        
+        /* For no overlaps message */
+        .no-overlaps-msg {
+            display: none;
+        }
+        
+        /* Only show when needed */
+        .show-no-overlaps {
+            display: block !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="page-header">
+                    <h1><i class="fas fa-users me-2"></i> Abusement Awaits Scheduler</h1>
+                    <p>Find the perfect time to meet and drink</p>
+                    <p>And also for Gautham to wash his cloths</p>
+                </div>
+                
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                                <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }} me-2"></i>
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <!-- Meetup Date Section (Only shows when everyone is available) -->
+                {% if meetup_slot %}
+                <div class="meetup-card">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-calendar-check fa-3x me-3" style="color: var(--highlight-color);"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="mb-1">Everyone is available! 🎉</h4>
+                            <p class="mb-0">Great news! Everyone can meet on <strong>{{ meetup_slot.day }}</strong>, <strong>{{ meetup_slot.date_formatted }}</strong> from <strong>{{ meetup_slot.start }}</strong> to <strong>{{ meetup_slot.end }}</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="row">
+                    <!-- Form Section -->
+                    <div class="col-lg-5">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <i class="fas fa-calendar-plus me-2"></i> Add Your Availability
+                            </div>
+                            <div class="card-body">
+                                <form action="{{ url_for('add_availability') }}" method="post" id="availabilityForm">
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">Your Name</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                            <input type="text" class="form-control" id="name" name="name" placeholder="Enter your name" required>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="day" class="form-label">Day of the Week</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-calendar-day"></i></span>
+                                            <select class="form-select" id="day" name="day" required>
+                                                <option value="" selected disabled>Select a day</option>
+                                                <option value="Monday">Monday</option>
+                                                <option value="Tuesday">Tuesday</option>
+                                                <option value="Wednesday">Wednesday</option>
+                                                <option value="Thursday">Thursday</option>
+                                                <option value="Friday">Friday</option>
+                                                <option value="Saturday">Saturday</option>
+                                                <option value="Sunday">Sunday</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Full Day Option -->
+                                    <div class="full-day-option">
+                                        <input class="form-check-input" type="checkbox" id="full_day" name="full_day">
+                                        <label class="form-check-label" for="full_day">
+                                            Available all day <span class="badge bg-primary">Quick Option</span>
+                                        </label>
+                                    </div>
+                                    
+                                    <!-- Time Selection (Simplified) -->
+                                    <div class="row mb-3" id="timeSelectionArea">
+                                        <div class="col-md-6">
+                                            <label for="start_time" class="form-label">Start Time</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                                                <input type="time" class="form-control" id="start_time" name="start_time">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="end_time" class="form-label">End Time</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                                                <input type="time" class="form-control" id="end_time" name="end_time">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-plus-circle me-2"></i> Add Availability
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- User Entries Section -->
+                        <div class="card">
+                            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="fas fa-list-ul me-2"></i> Current Entries</h5>
+                                <form action="{{ url_for('clear_data') }}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash-alt me-1"></i> Clear All
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="card-body">
+                                {% if users %}
+                                    {% for user in users %}
+                                        <div class="user-entry">
+                                            <div class="d-flex justify-content-between">
+                                                <div>
+                                                    <strong>{{ user.name }}</strong>: {{ user.day }} 
+                                                    {% if user.full_day %}
+                                                        <span class="badge bg-success">All Day</span>
+                                                    {% else %}
+                                                        from <span class="badge bg-primary">{{ user.start_time }}</span> to 
+                                                        <span class="badge bg-primary">{{ user.end_time }}</span>
+                                                    {% endif %}
+                                                </div>
+                                                <div>
+                                                    <form action="{{ url_for('remove_entry', user_index=loop.index0) }}" method="post" class="d-inline">
+                                                        <button type="submit" class="invisible-btn text-danger" title="Remove Entry">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted text-center py-4">
+                                        <i class="fas fa-calendar-alt fa-2x mb-2"></i><br>
+                                        No entries yet. Add your availability above!
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div class="col-lg-7">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0"><i class="fas fa-handshake me-2"></i> Overlapping Availability</h5>
+                            </div>
+                            <div class="card-body">
+                                {% set has_overlaps = false %}
+                                {% for day, slots in overlaps.items() %}
+                                    {% if slots %}
+                                        {% set has_overlaps = true %}
+                                        <h5 class="section-title"><i class="fas fa-calendar-day me-2"></i>{{ day }}</h5>
+                                        {% for slot in slots %}
+                                            <div class="time-slot">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="mb-0"><i class="fas fa-clock me-2"></i>{{ slot.start }} - {{ slot.end }}</h6>
+                                                    <span class="badge bg-primary">{{ (time_to_minutes(slot.end) - time_to_minutes(slot.start)) // 60 }}h {{ (time_to_minutes(slot.end) - time_to_minutes(slot.start)) % 60 }}m</span>
+                                                </div>
+                                                <p class="mb-0 mt-2">
+                                                    <i class="fas fa-users me-2"></i> 
+                                                    <strong>People available:</strong> {{ slot.users|join(', ') }}
+                                                </p>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                <!-- Important fix: Only show this message when there are no overlaps -->
+                                {% if not has_overlaps %}
+                                <div class="text-center text-muted py-5">
+                                    <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                                    <h5>No overlapping time slots found yet!</h5>
+                                    <p>Add more availability entries to find common meeting times.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simple functionality for the full day checkbox
+        document.addEventListener('DOMContentLoaded', function() {
+            const fullDayCheckbox = document.getElementById('full_day');
+            const timeSelectionArea = document.getElementById('timeSelectionArea');
+            
+            // Toggle time selection based on full day checkbox
+            fullDayCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    timeSelectionArea.style.opacity = '0.5';
+                    timeSelectionArea.style.pointerEvents = 'none';
+                } else {
+                    timeSelectionArea.style.opacity = '1';
+                    timeSelectionArea.style.pointerEvents = 'auto';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
