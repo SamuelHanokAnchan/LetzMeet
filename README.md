@@ -19,7 +19,7 @@ A lightweight web application to solve the age-old problem of finding common fre
 
 ## 🚀 Live Demo
 
-Check out the live demo: [Friend Meetup Scheduler](https://friend-meetup-scheduler.onrender.com)
+Check out the live demo: [Friend Meetup Scheduler](https://abusementawaits.onrender.com)
 
 ## 💻 Tech Stack
 
