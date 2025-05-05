@@ -6,7 +6,6 @@
 
 A lightweight web application to solve the age-old problem of finding common free time slots among friends for meetups and events.
 
-![Friend Meetup Scheduler Screenshot](https://i.imgur.com/placeholder.png)
 
 ## 🌟 Features
 
