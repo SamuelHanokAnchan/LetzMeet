@@ -14,7 +14,36 @@ DATA_FILE = 'availability_data.json'
 def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, 'r') as f:
-            return json.load(f)
+            data = json.load(f)
+            
+            # Migration: Update old data format to new format
+            if 'users' in data:
+                for user in data['users']:
+                    # Check for old format users (without 'days' field)
+                    if 'days' not in user and 'day' in user:
+                        # Convert old format to new format
+                        user['days'] = [{
+                            'day': user['day'],
+                            'start_time': user.get('start_time', '00:00'),
+                            'end_time': user.get('end_time', '23:59'),
+                            'full_day': user.get('full_day', False)
+                        }]
+                        
+                        # Set default week if missing
+                        if 'week' not in user:
+                            user['week'] = 'current'
+                        
+                        # Remove old fields
+                        if 'day' in user:
+                            del user['day']
+                        if 'start_time' in user:
+                            del user['start_time']
+                        if 'end_time' in user:
+                            del user['end_time']
+                        if 'full_day' in user and 'days' in user:
+                            del user['full_day']
+            
+            return data
     else:
         return {'users': []}
 
@@ -33,6 +62,29 @@ def minutes_to_time(minutes):
     mins = minutes % 60
     return f"{hours:02d}:{mins:02d}"
 
+def get_date_for_day(day, week):
+    """Calculate the date for a given day and week"""
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    today = date.today()
+    
+    # Find the date of the specified day in the current week
+    today_weekday = today.weekday()  # Monday is 0
+    day_index = days.index(day)
+    
+    days_diff = day_index - today_weekday
+    if days_diff < 0:  # If the day is earlier in the week than today
+        days_diff += 7
+    
+    target_date = today + timedelta(days=days_diff)
+    
+    # Adjust for selected week
+    if week == "next":
+        target_date += timedelta(days=7)
+    elif week == "after_next":
+        target_date += timedelta(days=14)
+    
+    return target_date
+
 def calculate_overlaps():
     data = load_data()
     users = data['users']
@@ -41,54 +93,69 @@ def calculate_overlaps():
         return {}, None
     
     days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    overlaps = {day: [] for day in days}
+    weeks = ["current", "next", "after_next"]
+    
+    # Create a structure to hold all possible day-week combinations
+    overlaps = {}
+    for week in weeks:
+        overlaps[week] = {day: [] for day in days}
     
     # Get unique names for checking if everyone is available at the same time
     all_user_names = set(user['name'] for user in users)
     meetup_slot = None
     
-    for day in days:
-        users_on_day = [user for user in users if user['day'] == day]
-        
-        if len(users_on_day) < 2:
-            continue  # Need at least 2 users to have an overlap
-        
-        # Find the latest start time and earliest end time among all users for this day
-        start_times = [time_to_minutes(user['start_time']) for user in users_on_day]
-        end_times = [time_to_minutes(user['end_time']) for user in users_on_day]
-        
-        latest_start = max(start_times)
-        earliest_end = min(end_times)
-        
-        if latest_start < earliest_end:
-            names_present = set(user['name'] for user in users_on_day)
+    # Process each user's availability
+    for week in weeks:
+        for day in days:
+            # Find all availabilities for this specific day and week
+            day_availabilities = []
+            for user in users:
+                # Make sure user has days field
+                if 'days' not in user:
+                    continue
+                    
+                for day_info in user['days']:
+                    if day_info['day'] == day and user['week'] == week:
+                        day_availabilities.append({
+                            'name': user['name'],
+                            'start_time': day_info['start_time'],
+                            'end_time': day_info['end_time']
+                        })
             
-            overlap_slot = {
-                'start': minutes_to_time(latest_start),
-                'end': minutes_to_time(earliest_end),
-                'users': [user['name'] for user in users_on_day]
-            }
+            if len(day_availabilities) < 2:
+                continue  # Need at least 2 users to have an overlap
             
-            overlaps[day].append(overlap_slot)
+            # Find the latest start time and earliest end time
+            start_times = [time_to_minutes(avail['start_time']) for avail in day_availabilities]
+            end_times = [time_to_minutes(avail['end_time']) for avail in day_availabilities]
             
-            # Check if all users are available (for the meetup date feature)
-            if names_present == all_user_names and len(names_present) >= 2 and not meetup_slot:
-                # Get the current date and find next occurrence of this day
-                today = date.today()
-                today_day = today.weekday()  # Monday is 0
-                day_index = days.index(day)
+            latest_start = max(start_times)
+            earliest_end = min(end_times)
+            
+            if latest_start < earliest_end:
+                names_present = set(avail['name'] for avail in day_availabilities)
                 
-                days_until = (day_index - today_day) % 7
-                # Create the next occurrence date correctly
-                next_occurrence = today + timedelta(days=days_until)
-                
-                meetup_slot = {
-                    'day': day,
-                    'date': next_occurrence.strftime('%Y-%m-%d'),
-                    'date_formatted': next_occurrence.strftime('%B %d, %Y'),
+                overlap_slot = {
                     'start': minutes_to_time(latest_start),
-                    'end': minutes_to_time(earliest_end)
+                    'end': minutes_to_time(earliest_end),
+                    'users': [avail['name'] for avail in day_availabilities]
                 }
+                
+                overlaps[week][day].append(overlap_slot)
+                
+                # Check if all users are available (for the meetup date feature)
+                if names_present == all_user_names and len(names_present) >= 2 and not meetup_slot:
+                    target_date = get_date_for_day(day, week)
+                    
+                    meetup_slot = {
+                        'day': day,
+                        'week': week,
+                        'week_name': "Current Week" if week == "current" else "Next Week" if week == "next" else "Week After Next",
+                        'date': target_date.strftime('%Y-%m-%d'),
+                        'date_formatted': target_date.strftime('%B %d, %Y'),
+                        'start': minutes_to_time(latest_start),
+                        'end': minutes_to_time(earliest_end)
+                    }
     
     return overlaps, meetup_slot
 
@@ -105,14 +172,15 @@ def index():
 @app.route('/add', methods=['POST'])
 def add_availability():
     name = request.form.get('name')
-    day = request.form.get('day')
+    week = request.form.get('week')
+    days = request.form.getlist('days')  # Get multiple days
     start_time = request.form.get('start_time')
     end_time = request.form.get('end_time')
     full_day = request.form.get('full_day') == 'on'
     
     # Basic validation
-    if not name or not day:
-        flash('Name and day are required!', 'error')
+    if not name or not week or not days:
+        flash('Name, week, and at least one day are required!', 'error')
         return redirect(url_for('index'))
     
     # If full day is checked, set times to full day
@@ -129,13 +197,53 @@ def add_availability():
     
     # Add user availability
     data = load_data()
-    data['users'].append({
-        'name': name,
-        'day': day,
-        'start_time': start_time,
-        'end_time': end_time,
-        'full_day': full_day
-    })
+    
+    # Check if user already exists
+    user_exists = False
+    for user in data['users']:
+        if user['name'] == name and user['week'] == week:
+            # Make sure user has days field
+            if 'days' not in user:
+                user['days'] = []
+                
+            # Add days to existing user
+            for day in days:
+                # Check if day already exists
+                day_exists = False
+                for day_info in user['days']:
+                    if day_info['day'] == day:
+                        day_exists = True
+                        flash(f'You already added {day} for {name} in {week}!', 'error')
+                        break
+                
+                if not day_exists:
+                    user['days'].append({
+                        'day': day,
+                        'start_time': start_time,
+                        'end_time': end_time,
+                        'full_day': full_day
+                    })
+            
+            user_exists = True
+            break
+    
+    if not user_exists:
+        # Create new user entry
+        days_info = []
+        for day in days:
+            days_info.append({
+                'day': day,
+                'start_time': start_time,
+                'end_time': end_time,
+                'full_day': full_day
+            })
+        
+        data['users'].append({
+            'name': name,
+            'week': week,
+            'days': days_info
+        })
+    
     save_data(data)
     
     flash('Availability added successfully!', 'success')
